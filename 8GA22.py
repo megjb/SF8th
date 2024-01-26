@@ -43,9 +43,8 @@ for i in range(length):
 for i in range(length):
     grid[i] = {}
     for j in range(breadth):
-        grid[i][j]=[0 for i in range(2)]
-        grid[i][j].append([0,0])
-print(grid)
+        grid[i][j]=[1,0,[0,0]]
+
 ## Cross references points on grid to map
 def crossreference(grid,chrom_input):    
     for i in range(length):
@@ -159,24 +158,89 @@ def mutation(indiv):
                 indiv[1][i].insert(index2,choice1)
     return indiv
 
-def lanchester_battle(indiv):
-    enem_strength = 2
-    enem_pop = int(25500)
-    indiv_strength = indiv[0] 
-    indiv_pop = int(indiv[1])
+def lanchester_battle(indiv,enem):
+    enem_pop = enem[4][0]/2
+    indiv_pop = indiv[4][0]/2
+    
     while indiv_pop and enem_pop >= 1:
- 
+        
         pop1 = enem_pop
         pop2 = indiv_pop
-        indiv_pop -= (pop1*(enem_strength*accuracy_rate))
-        enem_pop -= (pop2*(indiv_strength*accuracy_rate))
+        indiv_pop -= (pop1*(enem[4][1]*accuracy_rate))
+        enem_pop -= (pop2*(indiv[4][1]*accuracy_rate))
  
         if enem_pop or indiv_pop <= 0:
+            if enem_pop >= indiv_pop:
+                winner = ('enem',enem_pop)
+            else:
+                winner = ('indiv',indiv_pop)
+
             break
-    return indiv_pop
+    return winner
                 
 def war(indiv):
-    grid[0][0] 
+    grid[0][0]=[1,0,1,1[1500,.5]]
+    for i in range(10):
+        for i in range(length):
+            for j in range(breadth):
+                if grid[i][j][2] == 1:
+                    troops_in_control = [i,j]
+        chrom_input = crossreference(grid,chrom_input)
+        dec = decision(chrom_input,indiv)
+        output = max(dec)
+        if dec.index(output) == 0:
+            if grid[troops_in_control[0]+1][troops_in_control[1]][1] == 1:
+                simulation = lanchester_battle(grid[troops_in_control[0]][troops_in_control[1]],grid[troops_in_control[0]+1][troops_in_control[1]])
+                if simulation[0] == 'enem':
+                    grid[troops_in_control[0]][troops_in_control[1]][4][0] = grid[troops_in_control[0]][troops_in_control[1]][4][0]/2
+                    grid[troops_in_control[0]+1][troops_in_control[1]][4][0] = abs(simulation[1]-=(grid[troops_in_control[0]+1][troops_in_control[1]])[4][0]/2)
+                    continue
+                else:
+                    grid[troops_in_control[0]+1][troops_in_control[1]][4][0] = grid[troops_in_control[0]][troops_in_control[1]][4][0]/2
+                    grid[troops_in_control[0]][troops_in_control[1]][4][0] = abs(simulation[1]-=(grid[troops_in_control[0]][troops_in_control[1]])[4][0]/2)
+                    continue
+            grid[troops_in_control[0]+1][troops_in_control[1]] = [1,0,1,1[grid[troops_in_control[0]+1][troops_in_control[1]][4][0]+=grid[troops_in_control[0]][troops_in_control[1][4][0]/2],.5]]
+            grid[troops_in_control[0]][troops_in_control[1]] = [1,0,1,0[grid[troops_in_control[0]][troops_in_control[1][4][0]/2],1]]
+        if dec.index(output) == 1:
+            if grid[troops_in_control[0]-1][troops_in_control[1]][1] == 1:
+                simulation = lanchester_battle(grid[troops_in_control[0]][troops_in_control[1]],grid[troops_in_control[0]-1][troops_in_control[1]])
+                if simulation[0] == 'enem':
+                    grid[troops_in_control[0]][troops_in_control[1]][4][0] = grid[troops_in_control[0]][troops_in_control[1]][4][0]/2
+                    grid[troops_in_control[0]-1][troops_in_control[1]][4][0] = abs(simulation[1]-=(grid[troops_in_control[0]-1][troops_in_control[1]])[4][0]/2)
+                    continue
+                else:
+                    grid[troops_in_control[0]-1][troops_in_control[1]][4][0] = grid[troops_in_control[0]][troops_in_control[1]][4][0]/2
+                    grid[troops_in_control[0]][troops_in_control[1]][4][0] = abs(simulation[1]-=(grid[troops_in_control[0]][troops_in_control[1]])[4][0]/2)
+                    continue
+            grid[troops_in_control[0]-1][troops_in_control[1]] = [1,0,1,1[grid[troops_in_control[0]-1][troops_in_control[1]][4][0]+=grid[troops_in_control[0]][troops_in_control[1][4][0]/2],.5]]
+            grid[troops_in_control[0]][troops_in_control[1]] = [1,0,1,0[grid[troops_in_control[0]][troops_in_control[1][4][0]/2],1]]
+        if dec.index(output) == 2:
+            if grid[troops_in_control[0]][troops_in_control[1]+1][1] == 1:
+                simulation = lanchester_battle(grid[troops_in_control[0]][troops_in_control[1]],grid[troops_in_control[0]][troops_in_control[1]+1])
+                if simulation[0] == 'enem':
+                    grid[troops_in_control[0]][troops_in_control[1]][4][0] = grid[troops_in_control[0]][troops_in_control[1]][4][0]/2
+                    grid[troops_in_control[0]][troops_in_control[1]+1][4][0] = abs(simulation[1]-=(grid[troops_in_control[0]][troops_in_control[1]+1])[4][0]/2)
+                    continue
+                else:
+                    grid[troops_in_control[0]][troops_in_control[1]+1][4][0] = grid[troops_in_control[0]][troops_in_control[1]][4][0]/2
+                    grid[troops_in_control[0]][troops_in_control[1]][4][0] = abs(simulation[1]-=(grid[troops_in_control[0]][troops_in_control[1]])[4][0]/2)
+                    continue
+            grid[troops_in_control[0]][troops_in_control[1]+1] = [1,0,1,1[grid[troops_in_control[0]][troops_in_control[1]+1][4][0]+=grid[troops_in_control[0]][troops_in_control[1][4][0]/2],.5]]
+            grid[troops_in_control[0]][troops_in_control[1]] = [1,0,1,0[grid[troops_in_control[0]][troops_in_control[1][4][0]/2],1]]
+        if dec.index(output) == 3:
+            if grid[troops_in_control[0]][troops_in_control[1]-1][1] == 1:
+                simulation = lanchester_battle(grid[troops_in_control[0]][troops_in_control[1]],grid[troops_in_control[0]][troops_in_control[1]-1])
+                if simulation[0] == 'enem':
+                    grid[troops_in_control[0]][troops_in_control[1]][4][0] = grid[troops_in_control[0]][troops_in_control[1]][4][0]/2
+                    grid[troops_in_control[0]][troops_in_control[1]-1][4][0] = abs(simulation[1]-=(grid[troops_in_control[0]][troops_in_control[1]-1])[4][0]/2)
+                    continue
+                else:
+                    grid[troops_in_control[0]][troops_in_control[1]-1][4][0] = grid[troops_in_control[0]][troops_in_control[1]][4][0]/2
+                    grid[troops_in_control[0]][troops_in_control[1]][4][0] = abs(simulation[1]-=(grid[troops_in_control[0]][troops_in_control[1]])[4][0]/2)
+                    continue
+            grid[troops_in_control[0]][troops_in_control[1]-1] = [1,0,1,1[grid[troops_in_control[0]][troops_in_control[1]-1][4][0]+=grid[troops_in_control[0]][troops_in_control[1][4][0]/2],.5]]
+            grid[troops_in_control[0]][troops_in_control[1]] = [1,0,1,0[grid[troops_in_control[0]][troops_in_control[1][4][0]/2],1]]
+
 
 
 def decision(chrom_input,indiv):
