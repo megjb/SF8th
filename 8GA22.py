@@ -56,12 +56,12 @@ def crossreference(grid,chrom_input):
                     chrom_input[i][j][z] = 0    
 
 ## Creates new members of the population based off of the previous gen. Either through duplication with some mutation, or crossover
-def new_pop(pop,popfitness):
+def new_pop(pop):
     newpop = []
     while len(newpop) != len(pop):
         new_chromo = []
         if crossover_rate >= ra.uniform(0,1):
-            new_chromo = crossover(pop,popfitness)
+            new_chromo = crossover(pop)
             if len(newpop)+2 > len(pop):
                 while len(newpop)+2 > len(pop):
                     choi = ra.choice(new_chromo)
@@ -71,35 +71,26 @@ def new_pop(pop,popfitness):
             newpop.append(new_chromo[1])
             return newpop
         else:
-            new_chromo = mutation(roulette_selection(pop,popfitness)) 
+            new_chromo = mutation(roulette_selection(pop)) 
             if len(newpop)+1 > len(pop):
                     return newpop
             newpop.append(new_chromo)
     return newpop
 
 ## Selects a random individual in a weighted roulette wheel selection
-def roulette_selection(pop,popfitness):
-    global count 
+def roulette_selection(pop):
     wheel = []
     for x in pop:
-        indices = pop.index(x)
-        number = round(popfitness[indices]) 
-        if number<= 0:
-            if max(popfitness) <= 0:
-                numbers = popfitness
-                sorted_numbers = sorted(numbers)
-                number = sorted_numbers.index(round(popfitness[indices]))
-                if number == 0:
-                    number =1
-        for i in range(number):
+        fitnessvalue = war(x)
+        for i in range(fitnessvalue):
             wheel.append(x)
     choice = ra.choice(wheel)
     return choice
 
 ## Crossovers the individuals. Is the basis for the reproduction system
-def crossover(pop,popfitness):
-    a = roulette_selection(pop,popfitness)
-    b = roulette_selection(pop,popfitness)
+def crossover(pop):
+    a = roulette_selection(pop)
+    b = roulette_selection(pop)
     p1 = ra.randint(1,hlayer1)
     p2 = ra.randint(1,hlayer1-p1)
     individuals = two_point_crossover(a,b,p1,p2)
@@ -179,7 +170,7 @@ def lanchester_battle(indiv,enem):
     return winner
                 
 def war(indiv):
-    grid[0][0]=[1,0,1,1[1500,.5]]
+    grid[0][0]=[1,0,1,1,[1500,.5]]
     for i in range(10):
         for i in range(length):
             for j in range(breadth):
@@ -193,53 +184,60 @@ def war(indiv):
                 simulation = lanchester_battle(grid[troops_in_control[0]][troops_in_control[1]],grid[troops_in_control[0]+1][troops_in_control[1]])
                 if simulation[0] == 'enem':
                     grid[troops_in_control[0]][troops_in_control[1]][4][0] = grid[troops_in_control[0]][troops_in_control[1]][4][0]/2
-                    grid[troops_in_control[0]+1][troops_in_control[1]][4][0] = abs(simulation[1]-=(grid[troops_in_control[0]+1][troops_in_control[1]])[4][0]/2)
+                    grid[troops_in_control[0]+1][troops_in_control[1]][4][0] = abs(simulation[1]-(grid[troops_in_control[0]+1][troops_in_control[1]])[4][0]/2)
                     continue
                 else:
                     grid[troops_in_control[0]+1][troops_in_control[1]][4][0] = grid[troops_in_control[0]][troops_in_control[1]][4][0]/2
-                    grid[troops_in_control[0]][troops_in_control[1]][4][0] = abs(simulation[1]-=(grid[troops_in_control[0]][troops_in_control[1]])[4][0]/2)
+                    grid[troops_in_control[0]][troops_in_control[1]][4][0] = abs(simulation[1]-(grid[troops_in_control[0]][troops_in_control[1]])[4][0]/2)
                     continue
-            grid[troops_in_control[0]+1][troops_in_control[1]] = [1,0,1,1[grid[troops_in_control[0]+1][troops_in_control[1]][4][0]+=grid[troops_in_control[0]][troops_in_control[1][4][0]/2],.5]]
-            grid[troops_in_control[0]][troops_in_control[1]] = [1,0,1,0[grid[troops_in_control[0]][troops_in_control[1][4][0]/2],1]]
+            grid[troops_in_control[0]+1][troops_in_control[1]] = [1,0,1,1,[grid[troops_in_control[0]+1][troops_in_control[1]][4][0]+grid[troops_in_control[0]][troops_in_control[1][4][0]/2],.5]]
+            grid[troops_in_control[0]][troops_in_control[1]] = [1,0,1,0,[grid[troops_in_control[0]][troops_in_control[1][4][0]/2],1]]
         if dec.index(output) == 1:
             if grid[troops_in_control[0]-1][troops_in_control[1]][1] == 1:
                 simulation = lanchester_battle(grid[troops_in_control[0]][troops_in_control[1]],grid[troops_in_control[0]-1][troops_in_control[1]])
                 if simulation[0] == 'enem':
                     grid[troops_in_control[0]][troops_in_control[1]][4][0] = grid[troops_in_control[0]][troops_in_control[1]][4][0]/2
-                    grid[troops_in_control[0]-1][troops_in_control[1]][4][0] = abs(simulation[1]-=(grid[troops_in_control[0]-1][troops_in_control[1]])[4][0]/2)
+                    grid[troops_in_control[0]-1][troops_in_control[1]][4][0] = abs(simulation[1]-(grid[troops_in_control[0]-1][troops_in_control[1]])[4][0]/2)
                     continue
                 else:
                     grid[troops_in_control[0]-1][troops_in_control[1]][4][0] = grid[troops_in_control[0]][troops_in_control[1]][4][0]/2
-                    grid[troops_in_control[0]][troops_in_control[1]][4][0] = abs(simulation[1]-=(grid[troops_in_control[0]][troops_in_control[1]])[4][0]/2)
+                    grid[troops_in_control[0]][troops_in_control[1]][4][0] = abs(simulation[1]-(grid[troops_in_control[0]][troops_in_control[1]])[4][0]/2)
                     continue
-            grid[troops_in_control[0]-1][troops_in_control[1]] = [1,0,1,1[grid[troops_in_control[0]-1][troops_in_control[1]][4][0]+=grid[troops_in_control[0]][troops_in_control[1][4][0]/2],.5]]
-            grid[troops_in_control[0]][troops_in_control[1]] = [1,0,1,0[grid[troops_in_control[0]][troops_in_control[1][4][0]/2],1]]
+            grid[troops_in_control[0]-1][troops_in_control[1]] = [1,0,1,1,[grid[troops_in_control[0]-1][troops_in_control[1]][4][0]+grid[troops_in_control[0]][troops_in_control[1][4][0]/2],.5]]
+            grid[troops_in_control[0]][troops_in_control[1]] = [1,0,1,0,[grid[troops_in_control[0]][troops_in_control[1][4][0]/2],1]]
         if dec.index(output) == 2:
             if grid[troops_in_control[0]][troops_in_control[1]+1][1] == 1:
                 simulation = lanchester_battle(grid[troops_in_control[0]][troops_in_control[1]],grid[troops_in_control[0]][troops_in_control[1]+1])
                 if simulation[0] == 'enem':
                     grid[troops_in_control[0]][troops_in_control[1]][4][0] = grid[troops_in_control[0]][troops_in_control[1]][4][0]/2
-                    grid[troops_in_control[0]][troops_in_control[1]+1][4][0] = abs(simulation[1]-=(grid[troops_in_control[0]][troops_in_control[1]+1])[4][0]/2)
+                    grid[troops_in_control[0]][troops_in_control[1]+1][4][0] = abs(simulation[1]-(grid[troops_in_control[0]][troops_in_control[1]+1])[4][0]/2)
                     continue
                 else:
                     grid[troops_in_control[0]][troops_in_control[1]+1][4][0] = grid[troops_in_control[0]][troops_in_control[1]][4][0]/2
-                    grid[troops_in_control[0]][troops_in_control[1]][4][0] = abs(simulation[1]-=(grid[troops_in_control[0]][troops_in_control[1]])[4][0]/2)
+                    grid[troops_in_control[0]][troops_in_control[1]][4][0] = abs(simulation[1]-(grid[troops_in_control[0]][troops_in_control[1]])[4][0]/2)
                     continue
-            grid[troops_in_control[0]][troops_in_control[1]+1] = [1,0,1,1[grid[troops_in_control[0]][troops_in_control[1]+1][4][0]+=grid[troops_in_control[0]][troops_in_control[1][4][0]/2],.5]]
-            grid[troops_in_control[0]][troops_in_control[1]] = [1,0,1,0[grid[troops_in_control[0]][troops_in_control[1][4][0]/2],1]]
+            grid[troops_in_control[0]][troops_in_control[1]+1] = [1,0,1,1,[grid[troops_in_control[0]][troops_in_control[1]+1][4][0]+grid[troops_in_control[0]][troops_in_control[1][4][0]/2],.5]]
+            grid[troops_in_control[0]][troops_in_control[1]] = [1,0,1,0,[grid[troops_in_control[0]][troops_in_control[1][4][0]/2],1]]
         if dec.index(output) == 3:
             if grid[troops_in_control[0]][troops_in_control[1]-1][1] == 1:
                 simulation = lanchester_battle(grid[troops_in_control[0]][troops_in_control[1]],grid[troops_in_control[0]][troops_in_control[1]-1])
                 if simulation[0] == 'enem':
                     grid[troops_in_control[0]][troops_in_control[1]][4][0] = grid[troops_in_control[0]][troops_in_control[1]][4][0]/2
-                    grid[troops_in_control[0]][troops_in_control[1]-1][4][0] = abs(simulation[1]-=(grid[troops_in_control[0]][troops_in_control[1]-1])[4][0]/2)
+                    grid[troops_in_control[0]][troops_in_control[1]-1][4][0] = abs(simulation[1]-(grid[troops_in_control[0]][troops_in_control[1]-1])[4][0]/2)
                     continue
                 else:
                     grid[troops_in_control[0]][troops_in_control[1]-1][4][0] = grid[troops_in_control[0]][troops_in_control[1]][4][0]/2
-                    grid[troops_in_control[0]][troops_in_control[1]][4][0] = abs(simulation[1]-=(grid[troops_in_control[0]][troops_in_control[1]])[4][0]/2)
+                    grid[troops_in_control[0]][troops_in_control[1]][4][0] = abs(simulation[1]-(grid[troops_in_control[0]][troops_in_control[1]])[4][0]/2)
                     continue
-            grid[troops_in_control[0]][troops_in_control[1]-1] = [1,0,1,1[grid[troops_in_control[0]][troops_in_control[1]-1][4][0]+=grid[troops_in_control[0]][troops_in_control[1][4][0]/2],.5]]
-            grid[troops_in_control[0]][troops_in_control[1]] = [1,0,1,0[grid[troops_in_control[0]][troops_in_control[1][4][0]/2],1]]
+            grid[troops_in_control[0]][troops_in_control[1]-1] = [1,0,1,1,[grid[troops_in_control[0]][troops_in_control[1]-1][4][0]+grid[troops_in_control[0]][troops_in_control[1][4][0]/2],.5]]
+            grid[troops_in_control[0]][troops_in_control[1]] = [1,0,1,0,[grid[troops_in_control[0]][troops_in_control[1][4][0]/2],1]]
+    squarecount = 0 
+    for i in range(length):
+        for j in range(breadth):
+            if grid[i][j][2] == 1:
+                squarecount += 1
+    return squarecount
+
 
 
 
