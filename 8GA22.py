@@ -60,14 +60,14 @@ for i in range(length+1):
 for i in range(length+1):
     grid[i] = {}
     for j in range(breadth+1):
-        grid[i][j]=[1,0,0,0,[0,0]]
+        grid[i][j]=[[1,0,0,0,0],[0,0]]
 
 ## Cross references points on grid to map
 def crossreference(grid,chrom_input,control,enemcontrol):    
     for i in range(length+1):
         for j in range(breadth+1):
             for x in range(0,4):
-                if grid[i][j][x] == 1:
+                if grid[i][j][0][x] == 1:
                     chrom_input[i][j][x] =1
                 else:
                     chrom_input[i][j][x] =0
@@ -91,7 +91,7 @@ def crossreference(grid,chrom_input,control,enemcontrol):
     return chrom_input
 
 def enem_crossreference(grid,eneminput,control,enemcontrol):
-    grid[control[0]][control[1]][3], grid[enemcontrol[0]][enemcontrol[1]][4], grid[control[0]][control[1]][4], grid[enemcontrol[0]][enemcontrol[1]][3]= 0,0,1,1
+    grid[control[0]][control[1]][0][3], grid[enemcontrol[0]][enemcontrol[1]][0][4], grid[control[0]][control[1]][0][4], grid[enemcontrol[0]][enemcontrol[1]][0][3]= 0,0,1,1
     for i in range(length+1):
         for j in range(breadth+1):
             if grid[i][j][0] == 1:
@@ -99,14 +99,14 @@ def enem_crossreference(grid,eneminput,control,enemcontrol):
             else:
                 eneminput[i][j][0] = 0
             for f in range(1,2):
-                if grid[i][j][f]==1:
+                if grid[i][j][0][f]==1:
                     eneminput[i][j][f]=0
                 else:
                     eneminput[i][j][f]=1
             for x in range(3,4):
-                if grid[i][j][x] == 1:
+                if grid[i][j][0][x] == 1:
                     eneminput[i][j][x] =1
-                elif grid[i][j][x] ==0:
+                elif grid[i][j][0][x] ==0:
                     eneminput[i][j][x] =0
             for y in ((1,0,1),(-1,0,2),(0,1,3),(0,-1,4)): 
                 try:
@@ -148,13 +148,13 @@ def new_pop(pop1):
     return new_pop
 
 ## Selects a random individual in a weighted roulette wheel selection
-def roulette_selection(pop1,chrome_input,eniminput):
+def roulette_selection(pop1):
     wheel = []
     for x in pop1:
-        if database.index[pop1.index(x)] != []:
-            fitnessvalue = database.index[pop1.index(x)]
+        if database[pop1.index(x)] != []:
+            fitnessvalue = database[pop1.index(x)]
         else:    
-            fitnessvalue = war(x,chrom_input,eneminput,ra.choice(pop1),pop1)
+            fitnessvalue = war(x,ra.choice(pop1),pop1)
             database[pop.index(x)] = fitnessvalue
         for i in range(fitnessvalue):
             wheel.append(x)
@@ -227,7 +227,7 @@ def lanchester_battle(indiv,enem):
     enem_pop = enem[-1][0]/2
     indiv_pop = indiv[-1][0]/2
     
-    while indiv_pop and enem_pop >= 1:
+    while True:
         
         pop1 = enem_pop
         pop2 = indiv_pop
@@ -237,49 +237,51 @@ def lanchester_battle(indiv,enem):
         if enem_pop or indiv_pop <= 0:
             if enem_pop >= indiv_pop:
                 winner = ('enem',enem_pop)
+                break
             else:
                 winner = ('indiv',indiv_pop)
 
-            break
+                break
     return winner
                 
-def war(indiv,chrom_input,eneminput,enem,pop1):
+def war(indiv,enem,pop1):
     global database
-    global grid
+    global grid,chrom_input,eneminput
+    chrominput,enem_input = chrom_input,eneminput
     gride = grid
-    gride[0][0]=[0,0,1,1,0,[1500,.5]]
-    gride[length][breadth]=[0,1,0,0,1,[1500,.5]]
-    enemtemplate = 0,1,0,0,1
-    indivtemplate = 0,0,1,1,0
+    gride[0][0]=[[0,0,1,1,0],[1500,.5]]
+    gride[length][breadth]=[[0,1,0,0,1],[1500,.5]]
+    enemtemplate = [0,1,0,0,1],[0,1,0,0,0]
+    indivtemplate = [0,0,1,1,0],[0,0,1,0,0]
     for i in range(length+1):
         for j in range(breadth+1):
-                if gride[i][j][3] == 1:
+                if gride[i][j][0][3] == 1:
                     troops_in_control = [i,j]
-                if gride[i][j][4]==1:
+                if gride[i][j][0][4]==1:
                     enemcontrol = [i,j]
     for i in range(length+1):
-        chrom_input = crossreference(gride,chrom_input,troops_in_control,enemcontrol)
-        eneminput = enem_crossreference(gride,eneminput,troops_in_control,enemcontrol)
-        dec = decision(chrom_input,indiv,gride)
+        chrominput = crossreference(gride,chrominput,troops_in_control,enemcontrol)
+        enem_input = enem_crossreference(gride,enem_input,troops_in_control,enemcontrol)
+        dec = decision(chrominput,indiv,gride)
         output = max(dec)
-        grid = turn (gride,indiv,troops_in_control,dec,output,indivtemplate)
-        dec2 = decision(eneminput,enem,gride)
+        gride = turn (gride,indiv,troops_in_control,dec,output,indivtemplate)
+        dec2 = decision(enem_input,enem,gride)
         output2 = max(dec2)
-        grid=turn(gride,enem,enemcontrol,dec2,output2,enemtemplate)
+        gride=turn(gride,enem,enemcontrol,dec2,output2,enemtemplate)
     squarecount = 0 
     enemcount = 0
     for i in range(length+1):
         for j in range(breadth+1):
-            if gride[i][j][2] == 1:
+            if gride[i][j][0][2] == 1:
                 squarecount += 1
-            if gride[i][j][1] == 1:
+            if gride[i][j][0][1] == 1:
                 enemcount += 1
     database[pop1.index(enem)] = enemcount
     return squarecount
 
 def turn(grid,indiv,troops_in_control,dec,output,template):
     if dec.index(output) == 0:
-        if grid[limit_func(troops_in_control[0],length)][troops_in_control[1]][1] == 1:
+        if grid[limit_func(troops_in_control[0],length)][troops_in_control[1]][0][1] == 1:
             simulation = lanchester_battle(grid[troops_in_control[0]][troops_in_control[1]],grid[limit_func(troops_in_control[0],length)][troops_in_control[1]])
             if simulation[0] == 'enem':
                 grid[troops_in_control[0]][troops_in_control[1]][-1][0] = grid[troops_in_control[0]][troops_in_control[1]][-1][0]/2
@@ -289,13 +291,12 @@ def turn(grid,indiv,troops_in_control,dec,output,template):
                 grid[limit_func(troops_in_control[0],length)][troops_in_control[1]][-1][0] = grid[troops_in_control[0]][troops_in_control[1]][-1][0]/2
                 grid[troops_in_control[0]][troops_in_control[1]][-1][0] = abs(simulation[1]-(grid[troops_in_control[0]][troops_in_control[-1]])[-1][0]/2)
                 return grid
-        grid[limit_func(troops_in_control[0], length)][troops_in_control[1]] = [[template[x-1] for x in range(1, len(template))], [grid[limit_func(troops_in_control[0], length)][troops_in_control[1]][-1][0] + grid[troops_in_control[0]][troops_in_control[1]][-1][0] / 2, .5]]
-
+        grid[limit_func(troops_in_control[0], length)][troops_in_control[1]] = [[x for x in template[0]], [grid[limit_func(troops_in_control[0], length)][troops_in_control[1]][-1][0] + grid[troops_in_control[0]][troops_in_control[1]][-1][0] / 2, .5]]
         half = grid[troops_in_control[0]][troops_in_control[1]][-1][0]/2
-        grid[troops_in_control[0]][troops_in_control[1]] = [[template[x-1] for x in range(1,len(template))[half,.5]]]
+        grid[troops_in_control[0]][troops_in_control[1]] = [[x for x in template[1]], [half,.5]]
         return grid
     if dec.index(output) == 1:
-        if grid[abs(troops_in_control[0]-1)][troops_in_control[1]][1] == 1:
+        if grid[abs(troops_in_control[0]-1)][troops_in_control[1]][0][1] == 1:
             simulation = lanchester_battle(grid[troops_in_control[0]][troops_in_control[1]],grid[abs(troops_in_control[0]-1)][troops_in_control[1]])
             if simulation[0] == 'enem':
                 grid[troops_in_control[0]][troops_in_control[1]][-1][0] = grid[troops_in_control[0]][troops_in_control[1]][-1][0]/2
@@ -305,12 +306,12 @@ def turn(grid,indiv,troops_in_control,dec,output,template):
                 grid[abs(troops_in_control[0]-1)][troops_in_control[1]][-1][0] = grid[troops_in_control[0]][troops_in_control[1]][-1][0]/2
                 grid[troops_in_control[0]][troops_in_control[1]][-1][0] = abs(simulation[1]-(grid[troops_in_control[0]][troops_in_control[1]])[-1][0]/2)
                 return grid
-        grid[abs(troops_in_control[0]-1)][troops_in_control[1]] = [template[x-1] for x in range(1,len(template))[grid[abs(troops_in_control[0]-1)][troops_in_control[1]][-1][0]+grid[troops_in_control[0]][troops_in_control[1]][-1][0]/2,.5]]
+        grid[abs(troops_in_control[0]-1)][troops_in_control[1]] = [[x for x in template[0]], [grid[abs(troops_in_control[0]-1)][troops_in_control[1]][-1][0]+grid[troops_in_control[0]][troops_in_control[1]][-1][0]/2,.5]]
         half = grid[troops_in_control[0]][troops_in_control[1]][-1][0]/2
-        grid[troops_in_control[0]][troops_in_control[1]] = [template[x-1] for x in range(1,len(template))[half,.5]]
+        grid[troops_in_control[0]][troops_in_control[1]] = [[x for x in template[1]], [half,.5]]
         return grid
     if dec.index(output) == 2:
-        if grid[troops_in_control[0]][limit_func(troops_in_control[1],breadth)][1] == 1:
+        if grid[troops_in_control[0]][limit_func(troops_in_control[1],breadth)][0][1] == 1:
             simulation = lanchester_battle(grid[troops_in_control[0]][troops_in_control[1]],grid[troops_in_control[0]][limit_func(troops_in_control[1],breadth)])
             if simulation[0] == 'enem':
                 grid[troops_in_control[0]][troops_in_control[1]][-1][0] = grid[troops_in_control[0]][troops_in_control[1]][-1][0]/2
@@ -320,12 +321,12 @@ def turn(grid,indiv,troops_in_control,dec,output,template):
                 grid[troops_in_control[0]][limit_func(troops_in_control[1],breadth)][-1][0] = grid[troops_in_control[0]][troops_in_control[1]][-1][0]/2
                 grid[troops_in_control[0]][troops_in_control[1]][-1][0] = abs(simulation[1]-(grid[troops_in_control[0]][troops_in_control[1]])[-1][0]/2)
                 return grid
-        grid[troops_in_control[0]][limit_func(troops_in_control[1],breadth)] = [template[x-1] for x in range(1,len(template))[grid[troops_in_control[0]][limit_func(troops_in_control[1],breadth)][-1][0]+grid[troops_in_control[0]][troops_in_control[1]][-1][0]/2,.5]]
+        grid[troops_in_control[0]][limit_func(troops_in_control[1],breadth)] = [[x for x in template[0]], [grid[troops_in_control[0]][limit_func(troops_in_control[1],breadth)][-1][0]+grid[troops_in_control[0]][troops_in_control[1]][-1][0]/2,.5]]
         half = grid[troops_in_control[0]][troops_in_control[1]][-1][0]/2
-        grid[troops_in_control[0]][troops_in_control[1]] = [template[x-1] for x in range(1,len(template))[half,.5]]
+        grid[troops_in_control[0]][troops_in_control[1]] = [[x for x in template[1]], [half,.5]]
         return grid
     if dec.index(output) == 3:
-        if grid[troops_in_control[0]][abs(troops_in_control[1]-1)][1] == 1:
+        if grid[troops_in_control[0]][abs(troops_in_control[1]-1)][0][1] == 1:
             simulation = lanchester_battle(grid[troops_in_control[0]][troops_in_control[1]],grid[troops_in_control[0]][abs(troops_in_control[1]-1)])
             if simulation[0] == 'enem':
                 grid[troops_in_control[0]][troops_in_control[1]][-1][0] = grid[troops_in_control[0]][troops_in_control[1]][-1][0]/2
@@ -335,9 +336,9 @@ def turn(grid,indiv,troops_in_control,dec,output,template):
                 grid[troops_in_control[0]][abs(troops_in_control[1]-1)][-1][0] = grid[troops_in_control[0]][troops_in_control[1]][-1][0]/2
                 grid[troops_in_control[0]][troops_in_control[1]][-1][0] = abs(simulation[1]-(grid[troops_in_control[0]][troops_in_control[1]])[-1][0]/2)
                 return grid
-        grid[troops_in_control[0]][abs(troops_in_control[1]-1)] = [template[x-1] for x in range(1,len(template))[grid[troops_in_control[0]][abs(troops_in_control[1]-1)][-1][0]+grid[troops_in_control[0]][troops_in_control[1]][-1][0]/2,.5]]
+        grid[troops_in_control[0]][abs(troops_in_control[1]-1)] = [[x for x in template[0]], [grid[troops_in_control[0]][abs(troops_in_control[1]-1)][-1][0]+grid[troops_in_control[0]][troops_in_control[1]][-1][0]/2,.5]]
         half = grid[troops_in_control[0]][troops_in_control[1]][-1][0]/2
-        grid[troops_in_control[0]][troops_in_control[1]] = [template[x-1] for x in range(1,len(template))[half,.5]]    
+        grid[troops_in_control[0]][troops_in_control[1]] = [[x for x in template[1]], [half,.5]]    
         return grid
 
 def decision(chrom_input,indiv,grid):
@@ -380,11 +381,11 @@ def popfitnesses(pop1,chrome_input,eniminput):
     popfitness = []
     for indiv in pop1:
         if database[pop1.index(indiv)] != []:
-            popfitness.append(database.index[pop1.index(indiv)])
+            popfitness.append(database[pop1.index(indiv)])
         else:    
-            fitnessvalue = war(indiv,chrom_input,eneminput,ra.choice(pop1),pop1)
+            fitnessvalue = war(indiv,ra.choice(pop1),pop1)
             database[pop1.index(indiv)] = fitnessvalue 
-            popfitness.append(war(indiv,chrom_input,eneminput,ra.choice(pop1),pop1))
+            popfitness.append(war(indiv,ra.choice(pop1),pop1))
     return popfitness
 
 # dele = open("GAgraphinfo.txt","w")
